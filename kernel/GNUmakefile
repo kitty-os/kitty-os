@@ -18,11 +18,11 @@ endef
 # It is suggested to use a custom built cross toolchain to build a kernel.
 # We are using the standard "c++" here, it may work by using
 # the host system's toolchain, but this is not guaranteed.
-override DEFAULT_KCXX := c++
+override DEFAULT_KCXX := clang++
 $(eval $(call DEFAULT_VAR,KCXX,$(DEFAULT_KCXX)))
 
 # Same thing for "cc" (the C compiler).
-override DEFAULT_KCC := cc
+override DEFAULT_KCC := clang
 $(eval $(call DEFAULT_VAR,KCC,$(DEFAULT_KCC)))
 
 # Same thing for "ld" (the linker).
@@ -97,7 +97,8 @@ override KLDFLAGS += \
 # Internal nasm flags that should not be changed by the user.
 override KNASMFLAGS += \
     -Wall \
-    -f elf64
+    -f elf64 \
+    -I src/Hal/Int/ \
 
 # Use "find" to glob all *.cpp, *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
@@ -114,6 +115,9 @@ all: bin/$(KERNEL)
 
 src/limine.h:
 	curl -Lo $@ https://github.com/limine-bootloader/limine/raw/trunk/limine.h
+
+src/Hal/Int/table.cpp:
+	python3 src/Hal/Int/create_table.py
 
 # Link rules for the final kernel executable.
 # The magic printf/dd command is used to force the final ELF file type to ET_DYN.

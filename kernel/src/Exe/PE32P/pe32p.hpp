@@ -35,6 +35,11 @@ struct IMAGE_FILE_HEADER {
     uint16_t Characteristics;
 } __attribute__((packed));
 
+struct IMAGE_DATA_DIRECTORY {
+    uint32_t VirtualAddress;
+    uint32_t Size;
+} __attribute__((packed));
+
 struct IMAGE_OPTIONAL_HEADER64 {
     uint16_t Magic;
     uint8_t MajorLinkerVersion;
@@ -65,7 +70,7 @@ struct IMAGE_OPTIONAL_HEADER64 {
     uint64_t SizeOfHeapCommit;
     uint32_t LoaderFlags;
     uint32_t NumberOfRvaAndSizes;
-    // Data directories follow
+    IMAGE_DATA_DIRECTORY DataDirectory[];
 } __attribute__((packed));
 
 struct IMAGE_SECTION_HEADER {
@@ -84,9 +89,9 @@ struct IMAGE_SECTION_HEADER {
     uint32_t Characteristics;
 } __attribute__((packed));
 
-struct IMAGE_DATA_DIRECTORY {
-    uint32_t VirtualAddress;
-    uint32_t Size;
+struct IMAGE_IMPORT_BY_NAME {
+    uint16_t Hint;
+    char Name[1];
 } __attribute__((packed));
 
 struct IMAGE_IMPORT_DESCRIPTOR {
@@ -102,6 +107,7 @@ struct IMAGE_IMPORT_DESCRIPTOR {
 
 struct PE32PImageInformation
 {
+    void* image_base_address;
     bool is_valid;
     const IMAGE_DOS_HEADER* dos_header;
     const IMAGE_FILE_HEADER* file_header;
@@ -109,4 +115,16 @@ struct PE32PImageInformation
     const IMAGE_SECTION_HEADER* section_header;
 };
 
+struct IMAGE_THUNK_DATA {
+    union {
+        uint32_t* Function;             // address of imported function
+        uint32_t  Ordinal;              // ordinal value of function
+        uint32_t AddressOfData;        // RVA of imported name
+        uint32_t ForwarderString;              // RVA to forwarder string
+    } u1;
+} __attribute__((packed));
+
+
+
 void PE32PExeGetInformation(PE32PImageInformation* information, void* image);
+void PE32PExeResolveImportTable(void* image, PE32PImageInformation* information);

@@ -11,7 +11,7 @@ all-hdd: $(IMAGE_NAME).hdd
 
 .PHONY: run
 run: $(IMAGE_NAME).iso
-	qemu-system-x86_64 -serial file:serial.txt -device isa-debug-exit,iobase=0x501,iosize=2 -device qemu-xhci -serial mon:stdio -debugcon file:/dev/stdout -M q35 -m 4G -cdrom $(IMAGE_NAME).iso -boot d
+	qemu-system-x86_64 -d int -serial file:serial.txt -device isa-debug-exit,iobase=0x501,iosize=2 -device qemu-xhci -serial mon:stdio -debugcon file:/dev/stdout -M q35 -m 4G -cdrom $(IMAGE_NAME).iso -boot d
 
 .PHONY: run-uefi
 run-uefi: ovmf $(IMAGE_NAME).iso
@@ -39,6 +39,7 @@ kernel:
 	$(MAKE) -C kernel
 
 $(IMAGE_NAME).iso: limine/limine kernel
+	python3 limine.py
 	rm -rf iso_root
 	mkdir -p iso_root/boot
 	cp -v kernel/bin/kernel iso_root/boot/

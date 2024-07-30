@@ -1,7 +1,7 @@
 section .text
 
 extern KeInitSystem
-
+EFER_MSR_INDEX equ 0xC0000080
 global _start
 _start:
     mov rax, cr0

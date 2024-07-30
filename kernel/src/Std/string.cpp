@@ -4,52 +4,54 @@
 
 #include "string.hpp"
 
-size_t strlen(const char* str)
+extern "C"
 {
-    const char* s = str;
+size_t strlen(const char *str)
+{
+    const char *s = str;
     while (*s) ++s;
     return s - str;
 }
 
-char* strcpy(char* dest, const char* src)
+char *strcpy(char *dest, const char *src)
 {
-    char* d = dest;
+    char *d = dest;
     while ((*d++ = *src++) != '\0');
     return dest;
 }
 
-char* strcat(char* dest, const char* src)
+char *strcat(char *dest, const char *src)
 {
-    char* d = dest;
+    char *d = dest;
     while (*d) ++d;
     while ((*d++ = *src++) != '\0');
     return dest;
 }
 
-int strcmp(const char* str1, const char* str2)
+int strcmp(const char *str1, const char *str2)
 {
     while (*str1 && (*str1 == *str2))
     {
         ++str1;
         ++str2;
     }
-    return *(unsigned char*)str1 - *(unsigned char*)str2;
+    return *(unsigned char *) str1 - *(unsigned char *) str2;
 }
 
-void* memset(void* dest, int ch, size_t count)
+void *memset(void *dest, int ch, size_t count)
 {
-    unsigned char* d = (unsigned char*)dest;
+    unsigned char *d = (unsigned char *) dest;
     while (count--)
     {
-        *d++ = (unsigned char)ch;
+        *d++ = (unsigned char) ch;
     }
     return dest;
 }
 
-void* memcpy(void* dest, const void* src, size_t count)
+void *memcpy(void *dest, const void *src, size_t count)
 {
-    const unsigned char* s = (const unsigned char*)src;
-    unsigned char* d = (unsigned char*)dest;
+    const unsigned char *s = (const unsigned char *) src;
+    unsigned char *d = (unsigned char *) dest;
     while (count--)
     {
         *d++ = *s++;
@@ -57,10 +59,10 @@ void* memcpy(void* dest, const void* src, size_t count)
     return dest;
 }
 
-void* memmove(void* dest, const void* src, size_t count)
+void *memmove(void *dest, const void *src, size_t count)
 {
-    unsigned char* d = (unsigned char*)dest;
-    const unsigned char* s = (const unsigned char*)src;
+    unsigned char *d = (unsigned char *) dest;
+    const unsigned char *s = (const unsigned char *) src;
 
     if (d < s)
     {
@@ -80,10 +82,10 @@ void* memmove(void* dest, const void* src, size_t count)
     return dest;
 }
 
-int memcmp(const void* ptr1, const void* ptr2, size_t count)
+int memcmp(const void *ptr1, const void *ptr2, size_t count)
 {
-    const unsigned char* p1 = (const unsigned char*)ptr1;
-    const unsigned char* p2 = (const unsigned char*)ptr2;
+    const unsigned char *p1 = (const unsigned char *) ptr1;
+    const unsigned char *p2 = (const unsigned char *) ptr2;
     while (count--)
     {
         if (*p1 != *p2)
@@ -94,4 +96,5 @@ int memcmp(const void* ptr1, const void* ptr2, size_t count)
         ++p2;
     }
     return 0;
+}
 }

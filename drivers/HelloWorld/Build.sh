@@ -3,9 +3,9 @@ WORKING_DIR="src"
 BUILD_DIR="build"
 OBJECTS_DIR="build/obj"
 CC="x86_64-w64-mingw32-gcc"
-CFLAGS="-ffreestanding -nostdlib"
+CFLAGS="-Lkernel.lib  -ffreestanding -nostdlib"
 LD="x86_64-w64-mingw32-ld"
-LDFLAGS="-ffreestanding -nostdlib --shared -o $BUILD_DIR/$DRIVER_NAME.dll -e DriverEntry --output-def mylib.def $WORKING_DIR/$DRIVER_NAME.def"
+LDFLAGS="-ffreestanding -nostdlib --shared -o $BUILD_DIR/$DRIVER_NAME.sys -e DriverEntry --output-def $DRIVER_NAME.def"
 
 set -x
 

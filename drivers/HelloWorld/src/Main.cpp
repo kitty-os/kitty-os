@@ -4,5 +4,6 @@
 
 extern "C" void DriverEntry()
 {
+    asm volatile ("syscall");
     while (1);
 }

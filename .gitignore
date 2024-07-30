@@ -2,4 +2,3 @@
 /ovmf
 *.iso
 *.hdd
-/compiled_drivers

@@ -100,6 +100,12 @@ void GfxDrawPixel(
         Vector3<uint8_t> color
         );
 
+void GfxDrawPixelNoOutOfBounds(
+    limine_framebuffer* framebuffer,
+    Vector2<size_t> position,
+    Vector3<uint8_t> color
+);
+
 void GfxDrawPixelFragShadered(
         limine_framebuffer* framebuffer,
         Vector2<size_t> position,
