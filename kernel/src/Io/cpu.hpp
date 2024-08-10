@@ -12,6 +12,6 @@ inline void IoInvalidatePage(void* page)
             );
 }
 
-
+extern "C" void IoInitializeExtensions();
 uint64_t IoReadCpuCr3();
 void IoHaltProcessor();

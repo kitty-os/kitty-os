@@ -60,7 +60,28 @@ void* FwAcpiQueryTable(char signature[4])
 
         return nullptr;
     }
+}
 
+void FwAcpiEnumerateMADTEntries(std::function<void(void* entry)> lambda)
+{
+    char madt_signature[4] = {'A', 'P', 'I', 'C'};
+    MADT* madt = static_cast<MADT*>(FwAcpiQueryTable(madt_signature));
+
+    if (madt == nullptr)
+    {
+        return;
+    }
+
+    uint8_t* entries_start = reinterpret_cast<uint8_t*>(madt) + sizeof(MADT);
+    uint8_t* entries_end = reinterpret_cast<uint8_t*>(madt) + madt->sdt.length;
+
+    uint8_t* current_entry = entries_start;
+    while (current_entry < entries_end)
+    {
+        MADTEntry* entry = reinterpret_cast<MADTEntry*>(current_entry);
+        lambda(entry);
+        current_entry += entry->entry_length;
+    }
 }
 
 void FwInitializeACPI()

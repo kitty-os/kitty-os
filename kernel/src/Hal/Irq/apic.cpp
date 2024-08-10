@@ -1,45 +1,37 @@
 //
-// Created by Piotr on 28.07.2024.
+// Created by Piotr on 04.08.2024.
 //
 
 #include <Mm/memory_manager.hpp>
+#include <Ke/debug.hpp>
 #include <Io/msr.hpp>
 #include "apic.hpp"
 
-void HalIrqWriteToAPICRegister(uint32_t base_address, uint32_t offset, uint32_t value)
+void HalIrqApicWrite(uint64_t base, uint64_t offset, uint32_t value)
 {
-    volatile uint32_t* address = (volatile uint32_t*)(base_address + offset + MmGetHigherHalfDirectMemoryOffset());
-    *address = value;
+    volatile uint32_t* addr = (volatile uint32_t*) (base + offset);
+    *addr = value;
 }
 
-uint32_t HalIrqReadFromAPICRegister(uint32_t base_address, uint32_t offset)
+uint32_t HalIrqApicRead(uint64_t base, uint64_t offset)
 {
-    volatile uint32_t* address = (volatile uint32_t*)(base_address + offset + MmGetHigherHalfDirectMemoryOffset());
-    return *address;
+    volatile uint32_t* addr = (volatile uint32_t*) (base + offset);
+    return *addr;
 }
 
-void HalIrqSetAPICBase(uintptr_t apic)
+void HalIrqApicEndOfInterrupt(uint64_t base)
 {
-    uint32_t edx = 0;
-    uint32_t eax = (apic & 0xfffff0000) | IA32_APIC_BASE_MSR_ENABLE;
-
-    edx = (apic >> 32) & 0x0f;
-
-    wrmsr(IA32_APIC_BASE_MSR, (uint64_t)eax << 32 | edx);
+    HalIrqApicWrite(base, LAPIC_EOI_REGISTER, 0);
 }
 
-uintptr_t HalIrqGetAPICBase()
+void HalIrqInitializeLAPIC()
 {
-    uint64_t msr_value;
+    uint64_t apic_base = 0;
+    rdmsr(IA32_APIC_BASE_MSR, &apic_base);
+    apic_base &= ~(0xfff);
+    apic_base += MmGetHigherHalfDirectMemoryOffset();
 
-    rdmsr(IA32_APIC_BASE_MSR, &msr_value);
+    HalIrqApicWrite(apic_base, LAPIC_SPURIOUS_INTERRUPT_VECTOR_REGISTER, 0x1FF);
 
-    return (uintptr_t)(msr_value & 0xfffff000);
-}
-
-void HalIrqInitializeAPIC()
-{
-    auto base = HalIrqGetAPICBase();
-    HalIrqSetAPICBase(HalIrqGetAPICBase());
-    HalIrqWriteToAPICRegister(base, APIC_REG_SPURIOUS_INT_VEC, HalIrqReadFromAPICRegister(base, APIC_REG_SPURIOUS_INT_VEC) | 0x100); // Enable
+    HalIrqApicWrite(apic_base, LAPIC_TASK_PRIORITY_REGISTER, 0); // Allow them all.
 }

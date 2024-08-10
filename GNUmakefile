@@ -11,7 +11,7 @@ all-hdd: $(IMAGE_NAME).hdd
 
 .PHONY: run
 run: $(IMAGE_NAME).iso
-	qemu-system-x86_64 -d int -serial file:serial.txt -device isa-debug-exit,iobase=0x501,iosize=2 -device qemu-xhci -serial mon:stdio -debugcon file:/dev/stdout -M q35 -m 4G -cdrom $(IMAGE_NAME).iso -boot d
+	qemu-system-x86_64 -monitor stdio -smp 12 -d int -serial file:serial.txt -device isa-debug-exit,iobase=0x501,iosize=2 -device qemu-xhci -debugcon file:/dev/stdout -M q35 -m 8G -cdrom $(IMAGE_NAME).iso -boot d
 
 .PHONY: run-uefi
 run-uefi: ovmf $(IMAGE_NAME).iso
@@ -49,6 +49,8 @@ $(IMAGE_NAME).iso: limine/limine kernel
 	cp -v limine/BOOTX64.EFI iso_root/EFI/BOOT/
 	cp -v limine/BOOTIA32.EFI iso_root/EFI/BOOT/
 	cp compiled_drivers/*.sys iso_root/
+	cp fonts/*.ttf iso_root/
+	cp resources/*.* iso_root/
 	xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		--efi-boot boot/limine/limine-uefi-cd.bin \

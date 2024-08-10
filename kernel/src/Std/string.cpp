@@ -97,4 +97,23 @@ int memcmp(const void *ptr1, const void *ptr2, size_t count)
     }
     return 0;
 }
+
+char *strncat(char *dest, const char *src, size_t n)
+{
+    char *d = dest;
+
+    while (*d != '\0')
+    {
+        d++;
+    }
+
+    while (n-- && (*src != '\0'))
+    {
+        *d++ = *src++;
+    }
+
+    *d = '\0';
+
+    return dest;
+}
 }

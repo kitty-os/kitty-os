@@ -17,9 +17,9 @@
 #define MAP_PRESENT     (1 << 0)
 #define MAP_GLOBAL      (1 << 1)
 
-#define MAP_SUCCESS     CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_INFO,     0); // The map was successful.
-#define FAILED_TO_MAP   CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_ERROR,    1); // Failed to map the page (other).
-#define MISALIGNED_PAGE CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_CRITICAL, 2); // The page isn't aligned to the size of the page.
+#define MAP_SUCCESS     CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_INFO,     0) // The map was successful.
+#define FAILED_TO_MAP   CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_ERROR,    1) // Failed to map the page (other).
+#define MISALIGNED_PAGE CREATE_ERROR_CODE(MM_ERROR_BASE, SEVERITY_CRITICAL, 2) // The page isn't aligned to the size of the page.
 
 
 struct pml4
@@ -124,3 +124,6 @@ KSTATUS MmMapPage(
 limine_memmap_entry** MmRetrieveMemoryMap();
 size_t MmRetrieveMemoryMapEntryCount();
 limine_kernel_address_response* MmRetrieveKernelAddress();
+
+const char* MmInterpretMemoryMapEntryTypeAsString(uint64_t type);
+const wchar_t* MmInterpretMemoryMapEntryTypeAsWideString(uint64_t type);

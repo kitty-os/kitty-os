@@ -40,7 +40,7 @@ struct FreeListEntry
 
 FreeListEntry* head = nullptr;
 
-void MmInitializeMemoryManager()
+void __attribute__((noinline)) MmInitializeMemoryManager()
 {
     if (memory_higher_half_direct_memory_request.response == nullptr ||
         memory_map_request.response == nullptr) {
@@ -78,7 +78,7 @@ void MmInitializeMemoryManager()
     }
 }
 
-pml4* MmGetKernelPML4()
+pml4* __attribute__((noinline)) MmGetKernelPML4()
 {
     uint64_t cr3_value = IoReadCpuCr3();
     cr3_value &= ~(0xfff); // Mask out the flags to get PPN of PML4.
@@ -86,7 +86,7 @@ pml4* MmGetKernelPML4()
     return reinterpret_cast<pml4*>(cr3_value);
 }
 
-KSTATUS MmMapPage(
+KSTATUS __attribute__((noinline)) MmMapPage(
         pml4* pml4_table,
         uint64_t virtual_address,
         uint64_t physical_address,
@@ -94,6 +94,9 @@ KSTATUS MmMapPage(
         unsigned int map_flags
 )
 {
+    DbgPrintHexadecimal(virtual_address);
+    DbgPrintChar('\n');
+
     if (pml4_table == nullptr)
     {
         return FAILED_TO_MAP;
@@ -115,24 +118,82 @@ KSTATUS MmMapPage(
     if (pml4_table[address.pml4_index].pdp_ppn == 0)
     {
         auto addr = MmAllocatePage();
+        memset(addr, 0, 4096);
         pml4_table[address.pml4_index].pdp_ppn = (uint64_t)addr >> 12;
     }
 
-    pdp* pdp_structure = reinterpret_cast<pdp*>((pml4_table[address.pml4_index].pdp_ppn << 12) + hhdm_offset);
+    pdp* pdp_structure = reinterpret_cast<pdp*>(
+            ((pml4_table[address.pml4_index].pdp_ppn << 12) & ~0xffffff0000000000ULL) + hhdm_offset
+    );
+
     if (pdp_structure[address.pdp_index].pd_ppn == 0)
     {
         auto addr = MmAllocatePage();
-        pdp_structure[address.pdp_index].pd_ppn = (uint64_t)addr >> 12;
+        memset(addr, 0, 4096);
+        pdp_structure[address.pdp_index].pd_ppn = reinterpret_cast<uint64_t>(addr) >> 12;
     }
 
-    pd* pd_structure = reinterpret_cast<pd*>((pdp_structure[address.pdp_index].pd_ppn << 12) + hhdm_offset);
+    pd* pd_structure = reinterpret_cast<pd*>(
+            ((pdp_structure[address.pdp_index].pd_ppn << 12) & ~0xffffff0000000000ULL) + hhdm_offset
+    );
+
     if (pd_structure[address.pd_index].pt_ppn == 0)
     {
         auto addr = MmAllocatePage();
-        pd_structure[address.pd_index].pt_ppn = (uint64_t)addr >> 12;
+        memset(addr, 0, 4096);
+        pd_structure[address.pd_index].pt_ppn = reinterpret_cast<uint64_t>(addr) >> 12;
     }
 
-    pt* pt_structure = reinterpret_cast<pt*>((pd_structure[address.pd_index].pt_ppn << 12) + hhdm_offset);
+    uint64_t pt_structure_phys_address = pd_structure[address.pd_index].pt_ppn << 12;
+    pt_structure_phys_address &= ~0xffffff0000000000;
+    pt* pt_structure = reinterpret_cast<pt*>(pt_structure_phys_address + hhdm_offset);
+
+    if (virtual_address == 0xFFFF800180200000)
+    {
+        DbgPrintf("PML: %llx\nPDP: %llx\n PD: %llx\n PT: %llx\n Phys: %llx\n Virt: %llx\n", pml4_table, pdp_structure, pd_structure, pt_structure, physical_address, virtual_address);
+    }
+
+    // Clear all fields and set only the specified flags
+    pml4_table[address.pml4_index].present = is_present_set;
+    pml4_table[address.pml4_index].rw = is_rw_set;
+    pml4_table[address.pml4_index].user = is_user_set;
+    pml4_table[address.pml4_index].no_execute = is_no_execute_set;
+    // Clear unspecified flags
+    pml4_table[address.pml4_index].pwt = 0;
+    pml4_table[address.pml4_index].pcd = 0;
+    pml4_table[address.pml4_index].accesed = 0;
+    pml4_table[address.pml4_index].ignored = 0;
+    pml4_table[address.pml4_index].mbz = 0;
+    pml4_table[address.pml4_index].ats0 = 0;
+    pml4_table[address.pml4_index].ats1 = 0;
+
+    pdp_structure[address.pdp_index].present = is_present_set;
+    pdp_structure[address.pdp_index].rw = is_rw_set;
+    pdp_structure[address.pdp_index].user = is_user_set;
+    pdp_structure[address.pdp_index].no_execute = is_no_execute_set;
+    // Clear unspecified flags
+    pdp_structure[address.pdp_index].pwt = 0;
+    pdp_structure[address.pdp_index].pcd = 0;
+    pdp_structure[address.pdp_index].accesed = 0;
+    pdp_structure[address.pdp_index].ignored = 0;
+    pdp_structure[address.pdp_index].mbz = 0;
+    pdp_structure[address.pdp_index].ignored2 = 0;
+    pdp_structure[address.pdp_index].ats0 = 0;
+    pdp_structure[address.pdp_index].ats1 = 0;
+
+    pd_structure[address.pd_index].present = is_present_set;
+    pd_structure[address.pd_index].rw = is_rw_set;
+    pd_structure[address.pd_index].user = is_user_set;
+    pd_structure[address.pd_index].no_execute = is_no_execute_set;
+    // Clear unspecified flags
+    pd_structure[address.pd_index].pwt = 0;
+    pd_structure[address.pd_index].pcd = 0;
+    pd_structure[address.pd_index].accesed = 0;
+    pd_structure[address.pd_index].ignored = 0;
+    pd_structure[address.pd_index].mbz = 0;
+    pd_structure[address.pd_index].ignored2 = 0;
+    pd_structure[address.pd_index].ats0 = 0;
+    pd_structure[address.pd_index].ats1 = 0;
 
     pt_structure[address.pt_index].present = is_present_set;
     pt_structure[address.pt_index].rw = is_rw_set;
@@ -140,28 +201,23 @@ KSTATUS MmMapPage(
     pt_structure[address.pt_index].papn_ppn = physical_address >> 12;
     pt_structure[address.pt_index].no_execute = is_no_execute_set;
     pt_structure[address.pt_index].global = is_global_set;
-
-    pd_structure[address.pd_index].present = is_present_set;
-    pd_structure[address.pd_index].rw = is_rw_set;
-    pd_structure[address.pd_index].user = is_user_set;
-    pd_structure[address.pd_index].no_execute = is_no_execute_set;
-
-    pdp_structure[address.pdp_index].present = is_present_set;
-    pdp_structure[address.pdp_index].rw = is_rw_set;
-    pdp_structure[address.pdp_index].user = is_user_set;
-    pdp_structure[address.pdp_index].no_execute = is_no_execute_set;
-
-    pml4_table[address.pml4_index].present = is_present_set;
-    pml4_table[address.pml4_index].rw = is_rw_set;
-    pml4_table[address.pml4_index].user = is_user_set;
-    pml4_table[address.pml4_index].no_execute = is_no_execute_set;
+    // Clear unspecified flags
+    pt_structure[address.pt_index].pwt = 0;
+    pt_structure[address.pt_index].pcd = 0;
+    pt_structure[address.pt_index].accesed = 0;
+    pt_structure[address.pt_index].dirty = 0;
+    pt_structure[address.pt_index].pat = 0;
+    pt_structure[address.pt_index].ats0 = 0;
+    pt_structure[address.pt_index].ats1 = 0;
+    pt_structure[address.pt_index].pkeys = 0;
 
     IoInvalidatePage((void*)virtual_address);
 
     return MAP_SUCCESS;
 }
 
-VirtualAddress MmSplitVirtualAddress(uint64_t address)
+
+VirtualAddress __attribute__((noinline)) MmSplitVirtualAddress(uint64_t address)
 {
     VirtualAddress va;
     va.offset = address & 0xFFF;               // Extract the last 12 bits
@@ -174,7 +230,7 @@ VirtualAddress MmSplitVirtualAddress(uint64_t address)
     return va;
 }
 
-uint64_t MmMergeVirtualAddress(VirtualAddress va)
+uint64_t __attribute__((noinline)) MmMergeVirtualAddress(VirtualAddress va)
 {
     uint64_t address = 0;
     address |= (static_cast<uint64_t>(va.padding) << 48);
@@ -187,12 +243,12 @@ uint64_t MmMergeVirtualAddress(VirtualAddress va)
     return address;
 }
 
-uintptr_t MmGetHigherHalfDirectMemoryOffset()
+uintptr_t __attribute__((noinline)) MmGetHigherHalfDirectMemoryOffset()
 {
     return hhdm_offset;
 }
 
-bool MmPageExists(pml4* pml4_table, uint64_t virtual_address)
+bool __attribute__((noinline)) MmPageExists(pml4* pml4_table, uint64_t virtual_address)
 {
     if (pml4_table == nullptr)
         return false;
@@ -220,7 +276,7 @@ bool MmPageExists(pml4* pml4_table, uint64_t virtual_address)
     return true;
 }
 
-void* MmAllocatePage()
+void* __attribute__((noinline)) MmAllocatePage()
 {
     FreeListEntry* previous = nullptr;
     FreeListEntry* current = head;
@@ -272,7 +328,7 @@ void* MmAllocatePage()
     return nullptr; // No suitable block found
 }
 
-void MmDeallocatePage(void* ptr)
+void __attribute__((noinline)) MmDeallocatePage(void* ptr)
 {
     uintptr_t base = reinterpret_cast<uintptr_t>(ptr) + hhdm_offset;
     FreeListEntry* dealloc_entry = reinterpret_cast<FreeListEntry*>(base);
@@ -333,4 +389,54 @@ size_t MmRetrieveMemoryMapEntryCount()
 limine_kernel_address_response* MmRetrieveKernelAddress()
 {
     return kernel_address_request.response;
+}
+
+const char* MmInterpretMemoryMapEntryTypeAsString(uint64_t type)
+{
+    switch (type)
+    {
+        case LIMINE_MEMMAP_USABLE:
+            return "Usable";
+        case LIMINE_MEMMAP_RESERVED:
+            return "Reserved";
+        case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
+            return "ACPI Reclaimable";
+        case LIMINE_MEMMAP_ACPI_NVS:
+            return "ACPI NVS";
+        case LIMINE_MEMMAP_BAD_MEMORY:
+            return "Bad Memory";
+        case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
+            return "Bootloader Reclaimable";
+        case LIMINE_MEMMAP_KERNEL_AND_MODULES:
+            return "Kernel and Modules";
+        case LIMINE_MEMMAP_FRAMEBUFFER:
+            return "Framebuffer";
+        default:
+            return "Unknown";
+    }
+}
+
+const wchar_t* MmInterpretMemoryMapEntryTypeAsWideString(uint64_t type)
+{
+    switch (type)
+    {
+        case LIMINE_MEMMAP_USABLE:
+            return L"Usable";
+        case LIMINE_MEMMAP_RESERVED:
+            return L"Reserved";
+        case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
+            return L"ACPI Reclaimable";
+        case LIMINE_MEMMAP_ACPI_NVS:
+            return L"ACPI NVS";
+        case LIMINE_MEMMAP_BAD_MEMORY:
+            return L"Bad Memory";
+        case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
+            return L"Bootloader Reclaimable";
+        case LIMINE_MEMMAP_KERNEL_AND_MODULES:
+            return L"Kernel and Modules";
+        case LIMINE_MEMMAP_FRAMEBUFFER:
+            return L"Framebuffer";
+        default:
+            return L"Unknown";
+    }
 }

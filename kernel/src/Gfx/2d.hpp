@@ -127,3 +127,10 @@ void GfxDrawRectangleFragShadered(
         Vector2<size_t> dimensions,
         std::function<void(const Vector2<size_t>& position, Vector3<uint8_t>& pixel)> basic_shader
         );
+
+void GfxDrawLine(
+        limine_framebuffer* framebuffer,
+        Vector2<size_t> start,
+        Vector2<size_t> end,
+        Vector3<uint8_t> color
+);

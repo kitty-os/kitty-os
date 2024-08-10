@@ -60,9 +60,11 @@ override SHARED_FLAGS := \
     -fno-lto \
     -fPIE \
     -m64 \
-    -march=x86-64 \
-    -mno-sse \
-    -mno-sse2 \
+	-march=x86-64 \
+	-mno-avx \
+	-msse \
+	-msse2 \
+    -g \
     -mno-red-zone \
 
 # Internal C++ flags that should not be changed by the user.
@@ -81,9 +83,11 @@ override KCFLAGS += \
 override KCPPFLAGS := \
     -I src \
     -I include \
+    -I include/xed/ \
+    -I include/stb/ \
     $(KCPPFLAGS) \
     -MMD \
-    -MP
+    -MP \
 
 # Internal linker flags that should not be changed by the user.
 override KLDFLAGS += \
@@ -93,6 +97,9 @@ override KLDFLAGS += \
     -z text \
     -z max-page-size=0x1000 \
     -T linker.ld \
+    -Lxed \
+    -lxed \
+    -lxed-ild \
 
 # Internal nasm flags that should not be changed by the user.
 override KNASMFLAGS += \
