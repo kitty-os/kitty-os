@@ -7,10 +7,16 @@
 #include <Mm/heap.hpp>
 #include <Io/cpu.hpp>
 #include <cstdint>
+#include "memory.hpp"
 
-// 1GB vmem max
-// 1MB pmem init
-Heap heap(1 * 1024 * 1024 * 1024ULL, 1 * 1024 * 1024ULL);
+Heap heap;
+
+void RtlInitializeGlobalHeap()
+{
+    // 1GB vmem max
+    // 1MB pmem init
+    heap.HeapInit(1 * 1024 * 1024 * 1024ULL, 1 * 1024 * 1024ULL);
+}
 
 void* operator new(std::size_t size)
 {

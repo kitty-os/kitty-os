@@ -7,7 +7,7 @@ class Heap
 public:
     constexpr static size_t alignment = 16;
 
-    explicit Heap(size_t init_vmem, size_t init_pmem);
+    void HeapInit(size_t init_vmem, size_t init_pmem);
 
     void* AllocateMemory(size_t length);
     void DeallocateMemory(void* ptr);

@@ -4,6 +4,7 @@
 
 #include <Mm/memory_manager.hpp>
 #include <Ke/debug.hpp>
+#include <Io/cpuid.hpp>
 #include <Io/msr.hpp>
 #include "apic.hpp"
 
@@ -24,6 +25,28 @@ void HalIrqApicEndOfInterrupt(uint64_t base)
     HalIrqApicWrite(base, LAPIC_EOI_REGISTER, 0);
 }
 
+uint64_t HalIrqGetAPICFrequency()
+{
+    uint32_t eax, ebx, ecx, edx;
+
+    // Retrieve CPUID.0x15
+    cpuid(0x15, eax, ebx, ecx, edx);
+    uint32_t crystal_frequency = ecx;  // Core crystal clock in Hz
+
+    // Fallback to CPUID.0x16 if necessary
+    if (crystal_frequency == 0)
+    {
+        cpuid(0x16, eax, ebx, ecx, edx);
+        crystal_frequency = eax * 1000000;  // Base/core frequency in Hz
+    }
+
+    // Now we directly use the core crystal frequency or base frequency.
+    uint64_t apic_timer_frequency = crystal_frequency;
+
+    return apic_timer_frequency;
+}
+
+
 void HalIrqInitializeLAPIC()
 {
     uint64_t apic_base = 0;
@@ -34,4 +57,9 @@ void HalIrqInitializeLAPIC()
     HalIrqApicWrite(apic_base, LAPIC_SPURIOUS_INTERRUPT_VECTOR_REGISTER, 0x1FF);
 
     HalIrqApicWrite(apic_base, LAPIC_TASK_PRIORITY_REGISTER, 0); // Allow them all.
+
+    DbgWprintf(L"Freq: %llx (hex Hz)\n", (HalIrqGetAPICFrequency()));
+
+    // enable the timer cuh.
+
 }

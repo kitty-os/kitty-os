@@ -1,3 +1,4 @@
+#include <Std/string.hpp>
 #include <Gfx/2d.hpp>
 #include <string>
 #include "ttf.hpp"
@@ -278,6 +279,8 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuff
     int ascent, descent, line_gap;
     stbtt_GetFontVMetrics(&ctx->font, &ascent, &descent, &line_gap);
 
+    int line_height = ctx->scale * (ascent - descent + line_gap);
+
     while (i < len)
     {
         wchar_t character = characters[i];
@@ -297,7 +300,7 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuff
         // Handle line wrapping
         if (ctx->current_x + char_width > static_cast<int>(viewport.width)) {
             // Move to the next line
-            ctx->current_y += ctx->scale * (ascent - descent + line_gap);
+            ctx->current_y += line_height;
             ctx->current_x = 0;
         }
 
@@ -308,7 +311,7 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuff
             ctx->current_x += tab_width;
         } else if (character == L'\n') {
             // Move to the next line
-            ctx->current_y += ctx->scale * (ascent - descent + line_gap);
+            ctx->current_y += line_height;
             ctx->current_x = 0;
         } else {
             // Draw the character
@@ -319,12 +322,29 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuff
             ctx->current_x += (advance_width + kern_advance) * ctx->scale;
         }
 
-        // Check for y-axis overflow
-        if (ctx->current_y + ctx->scale * ascent >= static_cast<int>(viewport.height)) {
-            // Clear the screen and reset coordinates
-            GfxClearScreen(framebuffer, viewport, ctx->background_color);
-            ctx->current_x = 0;
-            ctx->current_y = 0;
+        // Check for y-axis overflow and scroll if necessary
+        if (ctx->current_y + ascent * ctx->scale >= static_cast<int>(viewport.height)) {
+            // Calculate how much to scroll
+            size_t scroll_amount = line_height;
+
+            // Move the framebuffer content up by the scroll amount using memmove
+            size_t bytes_per_pixel = framebuffer->bpp / 8;
+            size_t line_size = framebuffer->pitch;
+            uint8_t* framebuffer_start = static_cast<uint8_t*>(framebuffer->address);
+
+            memmove(
+                    framebuffer_start,                            // Destination address
+                    framebuffer_start + scroll_amount * line_size, // Source address
+                    (viewport.height - scroll_amount) * line_size  // Number of bytes to move
+            );
+
+            // Clear the bottom part of the viewport that was scrolled into view
+            Vector2<size_t> clear_position = {0, static_cast<size_t>(viewport.height - scroll_amount)};
+            Vector2<size_t> clear_dimensions = {viewport.width, scroll_amount};
+            GfxDrawRectangle(framebuffer, clear_position, ctx->background_color, clear_dimensions);
+
+            // Adjust the current_y position to remain within the viewport
+            ctx->current_y = viewport.height - line_height;
         }
 
         ++i;

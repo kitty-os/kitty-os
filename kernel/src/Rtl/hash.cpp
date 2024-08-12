@@ -23,6 +23,16 @@ namespace std
 
                 return load_factor > max_load_factor;
             }
+
+            [[gnu::used]] unsigned long _M_next_bkt(unsigned long current_bkt) const
+            {
+                // Assume we use a prime rehash policy, where bucket indices are based on a prime number
+                // This is a simple example, actual implementation would be more complex
+
+                // For demonstration, we'll just return the next bucket index
+                // In a real scenario, this would be more complex, considering prime numbers and rehashing policy
+                return current_bkt + 1; // Incrementing to the next bucket
+            }
         };
     }
 }

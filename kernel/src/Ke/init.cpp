@@ -15,11 +15,14 @@
 #include <Hal/Smp/smp.hpp>
 #include <Hal/Int/idt.hpp>
 #include <Hal/Mem/gdt.hpp>
+#include <Rtl/memory.hpp>
 #include <Std/string.hpp>
 #include <Ke/debug.hpp>
 #include <Io/cpu.hpp>
 
 #include "cute.hpp"
+
+#include <string>
 
 limine_module_request module_request = {
         .id = LIMINE_MODULE_REQUEST,
@@ -38,6 +41,8 @@ extern "C" void KeInitSystem()
 
     MmVmInitialize();
     DbgPrint("Past initializing virtual memory manager.\n");
+
+    RtlInitializeGlobalHeap();
 
     AbiCallCtors();
     DbgPrint("Called ABI constructors.\n");
@@ -71,7 +76,7 @@ extern "C" void KeInitSystem()
     {
         auto module = module_request.response->modules[mod_idx];
 
-        if (strcmp(module->cmdline, "JetBrainsMonoNerdFontMono-Regular.ttf") == 0)
+        if (strcmp(module->cmdline, "0xProtoNerdFontMono-Regular.ttf") == 0)
         {
             font_file = module;
             break;
@@ -84,7 +89,7 @@ extern "C" void KeInitSystem()
         IoHaltProcessor();
     }
 
-    GfxTextInitializeWithTTFFont(font_file->address, 16);
+    GfxTextInitializeWithTTFFont(font_file->address, 20);
 
     auto ecount = MmRetrieveMemoryMapEntryCount();
     auto entries = MmRetrieveMemoryMap();
@@ -110,6 +115,26 @@ extern "C" void KeInitSystem()
     GfxTextWprintf(L"Usable memory: %f [%s]\n", size, name);
 
     HalPciInitializePCIExpress();
+
+    int spaces = 100;
+    int ls = 0;
+    int rs = 20;
+    while (1)
+    {
+        if (rs == 0)
+        {
+            rs = spaces;
+            ls = 0;
+        }
+
+        for (size_t i = 0; ls > i; i++)
+            GfxTextWprintf(L" ");
+
+        GfxTextWprintf(L".\n");
+
+        ls++;
+        rs--;
+    }
 
     asm volatile ("int $0x0");
 

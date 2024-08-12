@@ -6,9 +6,10 @@
 #include <cstdint>
 #include <cstring> // For std::memset
 
-Heap::Heap(size_t init_vmem, size_t init_pmem)
-        : free_list(nullptr) // Initialize free_list
+void Heap::HeapInit(size_t init_vmem, size_t init_pmem)
 {
+    free_list = nullptr;
+
     // Insanity checks
     if (init_pmem > init_vmem || (init_pmem % 4096) != 0)
     {
@@ -118,7 +119,7 @@ void Heap::Extend(size_t pages)
 
     if (new_pmem_size > vmem_cap)
     {
-        DbgPrint("Heap out of virtual memory.\n");
+        DbgWprintf(L"Heap out of virtual memory %d %llx > %llx\n", (uint32_t)pages, (new_pmem_size), (vmem_cap));
         IoHaltProcessor();
     }
 

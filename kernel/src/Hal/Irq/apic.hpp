@@ -33,4 +33,5 @@
 void HalIrqApicWrite(uint64_t base, uint64_t offset, uint32_t value);
 uint32_t HalIrqApicRead(uint64_t base, uint64_t offset);
 void HalIrqApicEndOfInterrupt(uint64_t base);
+uint64_t HalIrqGetAPICFrequency();
 void HalIrqInitializeLAPIC();
