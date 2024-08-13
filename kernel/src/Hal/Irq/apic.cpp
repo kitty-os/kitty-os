@@ -58,7 +58,7 @@ void HalIrqInitializeLAPIC()
 
     HalIrqApicWrite(apic_base, LAPIC_TASK_PRIORITY_REGISTER, 0); // Allow them all.
 
-    DbgWprintf(L"Freq: %llx (hex Hz)\n", (HalIrqGetAPICFrequency()));
+    DbgPrintf("Freq: %llx (hex Hz)\n", (HalIrqGetAPICFrequency()));
 
     // enable the timer cuh.
 

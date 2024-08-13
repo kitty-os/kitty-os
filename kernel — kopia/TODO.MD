@@ -1,0 +1,42 @@
+Kernel to do list:
+ - [ ] Virtual File System.
+   - [ ] Permissions per each UUID on the system.
+   - [ ] Read / Write / Execute / Create / Delete generic permissions.
+   - [ ] Mount / Unmount partition / disk.
+   - [ ] Generic interface for mounted partitions / disks.
+   - [ ] Open file.
+   - [ ] Delete file.
+   - [ ] Read file.
+   - [ ] Write file.
+   - [ ] Create directory.
+   - [ ] Delete directory.
+   - [ ] Read file / folder permissions for group (UUID).
+   - [ ] List directory.
+   - [ ] Set file / folder permissions for group (UUID).
+ - [ ] Semi-full support for PE32+
+   - [ ] Support relocations.
+   - [ ] Support loading other DLLs from PE32+ executable/shared library.
+   - [ ] Add more APIs to better handle PE32+ images.
+   - [ ] Add support for executing .EXE
+   - [ ] Properly load segments with their proper permissions.
+ - [ ] Add support for multiple clock sources such as:
+   - [ ] PIT
+   - [ ] HPET
+   - [ ] LAPIC Timer
+ - [ ] Add support for inter processor interrupts (IPI).
+ - [ ] Add support for inter process communication (IPC).
+ - [ ] Add support for threads in the processeses (weak processes).
+ - [ ] Add basic drivers for:
+   - [ ] Network
+   - [ ] USB
+ - [ ] Add basic support for:
+   - [ ] FAT32
+   - [ ] NTFS
+   - [ ] EXT4
+   - [ ] EXT3
+   - [ ] EXT2
+   - [ ] CDFS (ISO 9660)
+ - [ ] Add power management through ACPI.
+ - [ ] Add scheduler.
+ - [ ] Make the kernel report its version on boot and generally, make it print something nice on start.
+ - [ ] Add functions to retrieve how much horizontally and vertically there can be characters using font methods.

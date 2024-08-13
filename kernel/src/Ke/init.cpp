@@ -76,7 +76,7 @@ extern "C" void KeInitSystem()
     {
         auto module = module_request.response->modules[mod_idx];
 
-        if (strcmp(module->cmdline, "0xProtoNerdFontMono-Regular.ttf") == 0)
+        if (strcmp(module->cmdline, "FiraCode-Regular.ttf") == 0)
         {
             font_file = module;
             break;
@@ -112,36 +112,11 @@ extern "C" void KeInitSystem()
 
     auto size = RtlConvertDataSize(usable_memory, BYTE, MEBIBYTE);
     auto name = RtlInterpretDataSizeAsStringShortForm(MEBIBYTE);
-    GfxTextWprintf(L"Usable memory: %f [%s]\n", size, name);
+    GfxTextWprintf("Usable memory: %f [%s]\n", size, name);
+
+    GfxTextWprintf("\033[1;34mą\n");
 
     HalPciInitializePCIExpress();
-
-    int spaces = 100;
-    int ls = 0;
-    int rs = 20;
-    while (1)
-    {
-        if (rs == 0)
-        {
-            rs = spaces;
-            ls = 0;
-        }
-
-        for (size_t i = 0; ls > i; i++)
-            GfxTextWprintf(L" ");
-
-        GfxTextWprintf(L".\n");
-
-        ls++;
-        rs--;
-    }
-
-    asm volatile ("int $0x0");
-
-    while (1)
-    {
-        asm volatile ("nop");
-    }
 
     //IoHaltProcessor();
 }

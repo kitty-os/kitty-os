@@ -23,18 +23,18 @@ void HalSmpCoreGotoAddress(limine_smp_info* smp_info)
     IoInitializeExtensions();
 
     HalLoadGlobalDescriptorTable();
-    DbgWprintf(L"[CPU%d] Loaded new GDT.\n", smp_info->processor_id);
+    DbgPrintf("[CPU%d] Loaded new GDT.\n", smp_info->processor_id);
 
     HalLoadInterruptDescriptorTable();
-    DbgWprintf(L"[CPU%d]Loaded new IDT.\n", smp_info->processor_id);
+    DbgPrintf("[CPU%d]Loaded new IDT.\n", smp_info->processor_id);
 
     HalEnableInterrupts();
-    DbgWprintf(L"[CPU%d]Enabled interrupts.\n", smp_info->processor_id);
+    DbgPrintf("[CPU%d]Enabled interrupts.\n", smp_info->processor_id);
 
     HalIrqInitializeLAPIC();
-    DbgWprintf(L"[CPU%d]Configured LAPIC.\n", smp_info->processor_id);
+    DbgPrintf("[CPU%d]Configured LAPIC.\n", smp_info->processor_id);
 
-    DbgWprintf(L"Started CPU%d.\n", smp_info->processor_id);
+    DbgPrintf("Started CPU%d.\n", smp_info->processor_id);
     while (1)
     {
         asm volatile ("nop");
@@ -48,7 +48,7 @@ void HalSmpInitializeLogicalCores()
 
     auto response = smp_request.response;
 
-    DbgWprintf(L"CPU count: %d\n", (uint32_t) response->cpu_count);
+    DbgPrintf("CPU count: %d\n", (uint32_t) response->cpu_count);
 
     for (uint64_t cpu_idx = 0; response->cpu_count > cpu_idx; cpu_idx++)
     {

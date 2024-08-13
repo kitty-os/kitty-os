@@ -4,7 +4,7 @@
 
 #include <Gfx/fonts/ttf/ttf.hpp>
 #include <Io/framebuffer.hpp>
-#include <Rtl/wprintf.hpp>
+#include <stb_sprintf.h>
 #include <cstdarg>
 #include "render_text.hpp"
 
@@ -21,15 +21,24 @@ void GfxTextInitializeWithTTFFont(void* font_pointer, size_t font_size)
     GfxCreateTTFontContext(&ttf_context, font_pointer, font_size);
 }
 
-void GfxTextPrintWchar(const wchar_t wchr)
-{
-    wchar_t buf[2] = {wchr, L'\0'};
-    GfxDrawTTFCodepoints(&ttf_context, buf, fb, vp);
-}
-
-void GfxTextWprintf(const wchar_t* fmt, ...)
+void GfxTextWprintf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    RtlGenericWprintf(GfxTextPrintWchar, fmt, args);
+
+    char buffer[1024];
+    stbsp_vsnprintf(buffer, 1024, fmt, args);
+    GfxDrawTTFCodepoints(&ttf_context, buffer, fb, vp);
+
+    va_end(args);
+}
+
+size_t GfxGetMaxHorizontalCharacters()
+{
+
+}
+
+size_t GfxGetMaxVerticalCharacters()
+{
+
 }

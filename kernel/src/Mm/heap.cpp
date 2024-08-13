@@ -119,7 +119,7 @@ void Heap::Extend(size_t pages)
 
     if (new_pmem_size > vmem_cap)
     {
-        DbgWprintf(L"Heap out of virtual memory %d %llx > %llx\n", (uint32_t)pages, (new_pmem_size), (vmem_cap));
+        DbgPrintf("Heap out of virtual memory %d %llx > %llx\n", (uint32_t)pages, (new_pmem_size), (vmem_cap));
         IoHaltProcessor();
     }
 

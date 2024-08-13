@@ -2,8 +2,7 @@
 // Created by Piotr on 21.07.2024.
 //
 
-#include <Rtl/wprintf.hpp>
-#include <Rtl/printf.hpp>
+#include <stb_sprintf.h>
 #include <Io/io.hpp>
 #include <cstdarg>
 #include "debug.hpp"
@@ -49,26 +48,10 @@ void DbgPrintf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    RtlGenericPrintf(DbgPrintChar, fmt, args);
+
+    char buffer[1024] = {0};
+    stbsp_vsnprintf(buffer, 1024, fmt, args);
+    DbgPrint(buffer);
+
     va_end(args);
-}
-
-void DbgPrintWchar(const wchar_t wchr)
-{
-    char utf8[4];
-
-    std::size_t len = wcrtomb(utf8, wchr, nullptr);
-
-    if (len == static_cast<std::size_t>(-1))
-        return;
-
-    for (std::size_t i = 0; i < len; ++i)
-        outb(DEBUG_PORT, static_cast<uint8_t>(utf8[i]));
-}
-
-void DbgWprintf(const wchar_t* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    RtlGenericWprintf(DbgPrintWchar ,fmt, args);
 }

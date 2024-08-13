@@ -26,13 +26,13 @@ void HalPciInitializePCIExpress()
     auto table = FwAcpiQueryTable(mcfg_acpi_signature);
     if (table == nullptr)
     {
-        GfxTextWprintf(L"Failed to find %s table.\n", mcfg_acpi_signature);
+        GfxTextWprintf("Failed to find %s table.\n", mcfg_acpi_signature);
         return;
     }
 
     mcfg_table = (MCFG*) table;
 
-    GfxTextWprintf(L"Found table %s at address %llx\n", mcfg_acpi_signature, table);
+    GfxTextWprintf("Found table %s at address %llx\n", mcfg_acpi_signature, table);
 
     auto mcfg_size = sizeof(MCFG);
     baas_entry_count = (mcfg_table->sdt.length - mcfg_size) / sizeof(MCFGBAAS);
@@ -43,7 +43,7 @@ void HalPciInitializePCIExpress()
     {
         auto baas = baas_table[eidx];
 
-        GfxTextWprintf(L"Entry %d: %llx\n", eidx + 1, baas.base_address);
+        GfxTextWprintf("Entry %d: %llx\n", eidx + 1, baas.base_address);
 
         HalPciScanPciExpressBAAS(baas);
     }
@@ -74,17 +74,17 @@ void HalPciScanPciExpressBAAS(MCFGBAAS& baas)
 
                     if (db_entry == nullptr)
                     {
-                        GfxTextWprintf(L"No name.\n");
+                        GfxTextWprintf("No name.\n");
                         continue;
                     }
 
                     if (db_entry->subsystem_name != nullptr)
                     {
-                        GfxTextWprintf(L"[%s] [%s] %s\n",db_entry->vendor_name, db_entry->subsystem_name, db_entry->device_name);
+                        GfxTextWprintf("[%s] [%s] %s\n",db_entry->vendor_name, db_entry->subsystem_name, db_entry->device_name);
                     }
                     else
                     {
-                        GfxTextWprintf(L"[%s] %s\n",db_entry->vendor_name, db_entry->device_name);
+                        GfxTextWprintf("[%s] %s\n",db_entry->vendor_name, db_entry->device_name);
                     }
                 }
                 // multiple function type shi
@@ -108,22 +108,22 @@ void HalPciScanPciExpressBAAS(MCFGBAAS& baas)
 
                                 if (db_entry == nullptr)
                                 {
-                                    GfxTextWprintf(L"No name.\n");
+                                    GfxTextWprintf("No name.\n");
                                     continue;
                                 }
 
                                 if (db_entry->subsystem_name != nullptr)
                                 {
-                                    GfxTextWprintf(L"[%s] [%s] %s\n",db_entry->vendor_name, db_entry->subsystem_name, db_entry->device_name);
+                                    GfxTextWprintf("[%s] [%s] %s\n",db_entry->vendor_name, db_entry->subsystem_name, db_entry->device_name);
                                 }
                                 else
                                 {
-                                    GfxTextWprintf(L"[%s] %s\n",db_entry->vendor_name, db_entry->device_name);
+                                    GfxTextWprintf("[%s] %s\n",db_entry->vendor_name, db_entry->device_name);
                                 }
                             }
                             else
                             {
-                                GfxTextWprintf(L"Unknown multi-function device header type: %d\n", common_header->header_type);
+                                GfxTextWprintf("Unknown multi-function device header type: %d\n", common_header->header_type);
                             }
                         }
 
@@ -131,7 +131,7 @@ void HalPciScanPciExpressBAAS(MCFGBAAS& baas)
                 }
                 else
                 {
-                    GfxTextWprintf(L"Unknown header type: %d\n", common_header->header_type);
+                    GfxTextWprintf("Unknown header type: %d\n", common_header->header_type);
                 }
             }
         }

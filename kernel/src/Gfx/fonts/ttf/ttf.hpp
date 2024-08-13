@@ -29,4 +29,6 @@ struct Viewport {
 
 bool GfxCreateTTFontContext(TTFContext* ctx, void* font_buffer, float font_size);
 void GfxDrawTTFCodepoint(TTFContext* ctx, wchar_t character, size_t x_position, size_t y_position, limine_framebuffer* framebuffer, const Viewport& viewport);
-void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuffer* framebuffer, const Viewport& viewport);
+void GfxDrawTTFCodepoints(TTFContext* ctx, char* characters_nu, limine_framebuffer* framebuffer, const Viewport& viewport);
+size_t GfxTTFGetMaxHorizontalCharacters(TTFContext* ctx, const Viewport& viewport);
+size_t GfxTTFGetMaxVerticalCharacters(TTFContext* ctx, const Viewport& viewport);

@@ -2,7 +2,7 @@
 // Created by Piotr on 09.08.2024.
 //
 
-#include <Rtl/printf.hpp>
+#include <stb_sprintf.h>
 #include <Ke/debug.hpp>
 #include <Io/cpu.hpp>
 #include <cstdarg>
@@ -37,8 +37,16 @@ namespace std
     {
         va_list args;
         va_start(args, message);
-        RtlGenericPrintf(DbgPrintChar, message, args);
+        char buffer[1024];
+        stbsp_vsnprintf(buffer, 1024, message, args);
+        DbgPrint(buffer);
         va_end(args);
+        IoHaltProcessor();
+    }
+
+    void __throw_range_error(char const* message)
+    {
+        DbgPrint(message);
         IoHaltProcessor();
     }
 }

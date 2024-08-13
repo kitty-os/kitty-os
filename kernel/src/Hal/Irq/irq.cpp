@@ -19,7 +19,7 @@ void HalIrqInitializeAdvancedIRQs()
         switch (entry_header->entry_type)
         {
             case MADT_ENTRY_TYPE_IOAPIC_INTERRUPT_SOURCE_OVERRIDE:
-                DbgWprintf(L"ISA %d -> GSI %d\n", ioapic_iso->irq_source, ioapic_iso->gsi);
+                DbgPrintf("ISA %d -> GSI %d\n", ioapic_iso->irq_source, ioapic_iso->gsi);
                 break;
             case MADT_ENTRY_TYPE_IOAPIC:
                 HalIrqInitializeIOAPIC(((MADTIOAPIC*)madt_entry_pointer)->ioapic_address);

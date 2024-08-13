@@ -1,7 +1,44 @@
 #include <Std/string.hpp>
 #include <Gfx/2d.hpp>
+#include <codecvt>
 #include <string>
+#include <locale>
 #include "ttf.hpp"
+
+size_t GfxTTFGetMaxHorizontalCharacters(TTFContext* ctx, const Viewport& viewport)
+{
+    // Get font metrics
+    int ascent, descent, line_gap;
+    stbtt_GetFontVMetrics(&ctx->font, &ascent, &descent, &line_gap);
+
+    // Calculate character width
+    int advance_width, left_side_bearing;
+    stbtt_GetCodepointHMetrics(&ctx->font, L'W', &advance_width, &left_side_bearing); // 'W' is typically a wide character
+
+    // Character width in pixels
+    int char_width = advance_width * ctx->scale;
+
+    // Calculate the maximum number of characters that fit horizontally
+    size_t max_horizontal_chars = viewport.width / char_width;
+
+    return max_horizontal_chars;
+}
+
+size_t GfxTTFGetMaxVerticalCharacters(TTFContext* ctx, const Viewport& viewport)
+{
+    // Get font metrics
+    int ascent, descent, line_gap;
+    stbtt_GetFontVMetrics(&ctx->font, &ascent, &descent, &line_gap);
+
+    // Calculate line height
+    int line_height = ctx->scale * (ascent - descent + line_gap);
+
+    // Calculate the maximum number of lines that fit vertically
+    size_t max_vertical_lines = viewport.height / line_height;
+
+    return max_vertical_lines;
+}
+
 
 bool ParseAnsiColor(const std::wstring& text, size_t& index, TTFContext* ctx)
 {
@@ -271,8 +308,21 @@ void GfxClearScreen(limine_framebuffer* framebuffer, const Viewport& viewport, c
     }
 }
 
-void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuffer* framebuffer, const Viewport& viewport)
+wchar_t* ConvertToWchar(const char* utf8_str)
 {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wide_string = converter.from_bytes(utf8_str);
+
+    wchar_t* wchar_str = new wchar_t[wide_string.size() + 1];
+    std::wcscpy(wchar_str, wide_string.c_str());
+
+    return wchar_str;
+}
+
+void GfxDrawTTFCodepoints(TTFContext* ctx, char* characters_nu, limine_framebuffer* framebuffer, const Viewport& viewport)
+{
+    auto characters = ConvertToWchar(characters_nu);
+
     size_t len = wcslen(characters);
     size_t i = 0;
 
@@ -349,4 +399,6 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, wchar_t* characters, limine_framebuff
 
         ++i;
     }
+
+    delete[] characters;
 }

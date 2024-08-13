@@ -12,4 +12,7 @@ extern "C"
     wchar_t *wmemchr(const wchar_t *s, wchar_t c, size_t n) noexcept;
 
     size_t wcrtomb(char *mbstr, wchar_t wc, mbstate_t *ps) noexcept;
+    wchar_t* wcscpy(wchar_t* dest, const wchar_t* src) noexcept;
+    wchar_t* wmemset(wchar_t* dest, wchar_t wc, std::size_t n) noexcept;
+    wchar_t* wmemmove(wchar_t* dest, const wchar_t* src, std::size_t n) noexcept;
 }
