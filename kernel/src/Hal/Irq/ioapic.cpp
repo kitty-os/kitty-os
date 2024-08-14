@@ -4,7 +4,6 @@
 
 #include <Mm/memory_manager.hpp>
 #include <Ke/debug.hpp>
-#include <Io/io.hpp>
 #include "ioapic.hpp"
 
 void HalIrqIOAPICWrite(uint64_t base, uint64_t offset, uint32_t value)

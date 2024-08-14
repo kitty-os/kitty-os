@@ -18,4 +18,5 @@ extern "C" int fprintf(void *stream, const char *fmt, ...)
     DbgPrint(buffer);
 
     va_end(args);
+    return 0;
 }

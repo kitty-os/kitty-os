@@ -14,4 +14,9 @@ extern "C"
         return 0; // Do nothing
     }
 
+    void __cxa_pure_virtual()
+    {
+        DbgPrintf("Pure virtual function called.");
+        IoHaltProcessor();
+    }
 }

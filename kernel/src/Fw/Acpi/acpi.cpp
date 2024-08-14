@@ -3,7 +3,7 @@
 //
 
 #include <Mm/memory_manager.hpp>
-#include <Std/string.hpp>
+#include <Rtl/string.hpp>
 #include <Io/cpu.hpp>
 #include <limine.h>
 #include "acpi.hpp"

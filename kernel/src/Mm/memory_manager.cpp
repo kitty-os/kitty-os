@@ -2,11 +2,13 @@
 // Created by Piotr on 21.07.2024.
 //
 
-#include "memory_manager.hpp"
 #include <limine/limine.h>
-#include <Io/cpu.hpp>
+#include <Rtl/string.hpp>
 #include <Ke/debug.hpp>
-#include <Std/string.hpp>
+#include <Io/cpu.hpp>
+
+#include "memory_manager.hpp"
+
 
 /// Here I am making the comment that Qwinci is a godsend who told me how to use freelists and how it's beneficial and fast for me to use.
 

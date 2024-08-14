@@ -1,3 +1,6 @@
+bash create_test_image.sh
+cp testimg.img resources/
+
 cd drivers/HelloWorld/
 ./Build.sh
 cd ../../

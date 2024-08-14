@@ -98,6 +98,8 @@ override KLDFLAGS += \
     -z max-page-size=0x1000 \
     -T linker.ld \
     -Lxed \
+    -Lzlib \
+    -Llibpng \
     -lxed \
     -lxed-ild \
 
