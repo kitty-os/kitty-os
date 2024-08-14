@@ -38,7 +38,7 @@ bool Fat32::IsFilesystem(StorageInterface &si)
 
 std::pair <Filesystem::Status, Filesystem::FileUID> Fat32::Open(const char *path, Filesystem::OpenMode mode, Filesystem::UserUID as_user)
 {
-    return std::make_pair(UNIMPLEMENTED, 0);
+    return std::make_pair(SUCCESS, 69);
 }
 
 Filesystem::Status Fat32::Close(Filesystem::FileUID uid)

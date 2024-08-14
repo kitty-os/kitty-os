@@ -6,6 +6,7 @@
 #include <Ke/debug.hpp>
 #include <cstdarg>
 
+extern "C" bool __libc_single_threaded = true;
 extern "C" void* stderr = nullptr;
 
 extern "C" int fprintf(void *stream, const char *fmt, ...)

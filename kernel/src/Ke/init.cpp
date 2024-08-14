@@ -83,8 +83,8 @@ extern "C" void KeInitSystem()
     HalIrqInitializeAdvancedIRQs();
     DbgPrint("Initialized APIC.\n");
 
-    HalSmpInitializeLogicalCores();
-    DbgPrint("Initialized other cores.\n");
+    //HalSmpInitializeLogicalCores();
+    //DbgPrint("Initialized other cores.\n");
 
     if (module_request.response == nullptr)
     {
@@ -126,11 +126,34 @@ extern "C" void KeInitSystem()
 
     auto image = KeRequestModule("testimg.img");
 
+    if (!image)
+    {
+        DbgPrintf("No image found.\n");
+        IoHaltProcessor();
+    }
+
     VFS vfs;
     MemoryStorageInterface msi(123, image->address, image->size);
     Fat32 fat32(msi);
+    auto status = fat32.IsFilesystem(msi);
+    if (!status)
+    {
+        DbgPrintf("this is not fat32.\n");
+        IoHaltProcessor();
+    }
 
+    vfs.MountFilesystem("X:\\", std::make_unique<Fat32>(fat32));
 
+    auto status2 = vfs.Open("X:\\testfile.txt", Filesystem::OpenMode::READ, 0); // 0 for the kernel!!
+
+    if (status2.first == Filesystem::Status::SUCCESS)
+    {
+        DbgPrintf("Success! %lld\n", status2.second);
+    }
+    else
+    {
+        DbgPrintf("Failure: %lld\n", status2.first);
+    }
 
     HalPciInitializePCIExpress();
 
