@@ -39,4 +39,4 @@ Kernel to do list:
  - [ ] Add power management through ACPI.
  - [ ] Add scheduler.
  - [ ] Make the kernel report its version on boot and generally, make it print something nice on start.
- - [ ] Add functions to retrieve how much horizontally and vertically there can be characters using font methods.
+ - [x] Add functions to retrieve how much horizontally and vertically there can be characters using font methods.
