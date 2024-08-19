@@ -108,6 +108,9 @@ VirtualAddress MmSplitVirtualAddress(uint64_t address);
 uint64_t MmMergeVirtualAddress(VirtualAddress address);
 pml4* MmGetKernelPML4();
 
+uint64_t MmGetOverallMemory();
+uint64_t MmGetUsableMemory();
+
 uintptr_t MmGetHigherHalfDirectMemoryOffset();
 
 void MmInitializeMemoryManager();

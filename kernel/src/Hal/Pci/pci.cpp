@@ -14,12 +14,15 @@ MCFGBAAS* baas_table;
 size_t baas_entry_count;
 char mcfg_acpi_signature[4] = {'M', 'C', 'F', 'G'};
 
-struct PCIDeviceIdentifier
-{
-    uint16_t device_id, vendor_id, ss_vendor_id, ss_device_id;
-};
+std::vector<PCIDevice> pci_devices;
 
-std::vector<std::pair<PCIDeviceIdentifier, void*>> pci_express_devices;
+void HalPciEnumerateBus(std::function<void(const PCIDevice&)> lambda)
+{
+    for (const auto& dev : pci_devices)
+    {
+        lambda(dev);
+    }
+}
 
 void HalPciInitializePCIExpress()
 {
@@ -72,6 +75,8 @@ void HalPciScanPciExpressBAAS(MCFGBAAS& baas)
 
                     auto db_entry = HalPciQueryDeviceName(common_header->vendor_id, common_header->device_id, real_dev->subsystem_vendor_id, real_dev->subsystem_device_id);
 
+                    pci_devices.push_back({ true, (void*)pcie_device_data, {common_header->vendor_id, common_header->device_id, real_dev->subsystem_vendor_id, real_dev->subsystem_device_id}, db_entry });
+
                     if (db_entry == nullptr)
                     {
                         GfxTextWprintf("No name.\n");
@@ -105,6 +110,8 @@ void HalPciScanPciExpressBAAS(MCFGBAAS& baas)
                                 //pci_express_devices.push_back(std::make_pair({common_header->vendor_id, common_header->device_id, real_dev->subsystem_vendor_id, real_dev->subsystem_device_id}, (void*)pcie_device_data));
 
                                 auto db_entry = HalPciQueryDeviceName(common_header->vendor_id, common_header->device_id, real_dev->subsystem_vendor_id, real_dev->subsystem_device_id);
+
+                                pci_devices.push_back({ true, (void*)pcie_device_data, {common_header->vendor_id, common_header->device_id, real_dev->subsystem_vendor_id, real_dev->subsystem_device_id}, db_entry });
 
                                 if (db_entry == nullptr)
                                 {

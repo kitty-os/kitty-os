@@ -5,8 +5,22 @@
 #include <Hal/Irq/ioapic.hpp>
 #include <Fw/Acpi/acpi.hpp>
 #include <Hal/Irq/apic.hpp>
+#include <unordered_map>
 #include <Ke/debug.hpp>
+#include <Hal/Smp/smp.hpp>
 #include "irq.hpp"
+
+// a vector of pair containing an gsi base and base address to ioapic.
+std::vector<std::pair<int, uint64_t>> ioapics;
+std::vector<MADTIOAPICISO*> ioapic_isos;
+
+struct IRQ_MAPPING
+{
+    int irq; // isa or gsi
+    int cpu; // cpu index
+    int vec; // idt vector
+};
+std::vector<IRQ_MAPPING> irq_map;
 
 void HalIrqInitializeAdvancedIRQs()
 {
@@ -15,6 +29,7 @@ void HalIrqInitializeAdvancedIRQs()
         auto entry_header = (MADTEntry*) madt_entry_pointer;
         auto ioapic_iso = (MADTIOAPICISO*) madt_entry_pointer;
         auto lapic = (MADTLAPIC*) madt_entry_pointer;
+        auto ioapic = (MADTIOAPIC*)madt_entry_pointer;
 
         switch (entry_header->entry_type)
         {

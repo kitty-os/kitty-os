@@ -42,6 +42,19 @@ struct FreeListEntry
 
 FreeListEntry* head = nullptr;
 
+uint64_t overall_memory = 0;
+uint64_t usable_memory = 0;
+
+uint64_t MmGetOverallMemory()
+{
+    return overall_memory;
+}
+
+uint64_t MmGetUsableMemory()
+{
+    return usable_memory;
+}
+
 void __attribute__((noinline)) MmInitializeMemoryManager()
 {
     if (memory_higher_half_direct_memory_request.response == nullptr ||
@@ -57,9 +70,11 @@ void __attribute__((noinline)) MmInitializeMemoryManager()
     for (size_t entry_index = 0; entry_index < memory_map_entry_count; ++entry_index)
     {
         auto limine_entry = memory_map_entries[entry_index];
+        overall_memory += limine_entry->length;
 
         if (limine_entry->type == LIMINE_MEMMAP_USABLE)
         {
+            usable_memory += limine_entry->length;
             uintptr_t base = limine_entry->base + hhdm_offset;
             size_t length = limine_entry->length;
 
@@ -96,9 +111,6 @@ KSTATUS __attribute__((noinline)) MmMapPage(
         unsigned int map_flags
 )
 {
-    DbgPrintHexadecimal(virtual_address);
-    DbgPrintChar('\n');
-
     if (pml4_table == nullptr)
     {
         return FAILED_TO_MAP;
@@ -319,6 +331,7 @@ void* __attribute__((noinline)) MmAllocatePage()
                 }
             }
 
+            usable_memory -= 4096;
             return reinterpret_cast<void*>(allocated_address - hhdm_offset);
         }
 
@@ -349,34 +362,16 @@ void __attribute__((noinline)) MmDeallocatePage(void* ptr)
     {
         previous->next = dealloc_entry;
         dealloc_entry->next = current;
-
-        // Merge with the next block if possible
-        if (current != nullptr && (reinterpret_cast<uintptr_t>(dealloc_entry) + dealloc_entry->length) == reinterpret_cast<uintptr_t>(current))
-        {
-            dealloc_entry->length += current->length;
-            dealloc_entry->next = current->next;
-        }
-
-        // Merge with the previous block if possible
-        if (previous != nullptr && (reinterpret_cast<uintptr_t>(previous) + previous->length) == reinterpret_cast<uintptr_t>(dealloc_entry))
-        {
-            previous->length += dealloc_entry->length;
-            previous->next = dealloc_entry->next;
-        }
     }
     else
     {
         dealloc_entry->next = head;
         head = dealloc_entry;
-
-        // Merge with the next block if possible
-        if (head->next != nullptr && (reinterpret_cast<uintptr_t>(dealloc_entry) + dealloc_entry->length) == reinterpret_cast<uintptr_t>(head->next))
-        {
-            dealloc_entry->length += head->next->length;
-            dealloc_entry->next = head->next->next;
-        }
     }
+
+    usable_memory += 4096;
 }
+
 
 limine_memmap_entry** MmRetrieveMemoryMap()
 {

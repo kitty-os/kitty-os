@@ -20,13 +20,12 @@
 #include <Ke/debug.hpp>
 #include <Io/cpu.hpp>
 
-#include <Io/Fs/fat32/fat32.hpp>
+//#include <Io/Fs/ext2/ext2.hpp>
 #include <Io/SIs/MSI/msi.hpp>
 #include <Io/Vfs/vfs.hpp>
 
 #include "cute.hpp"
 
-#include <string>
 
 limine_module_request module_request = {
         .id = LIMINE_MODULE_REQUEST,
@@ -48,6 +47,11 @@ limine_file* KeRequestModule(const char* cmdline)
         }
     }
 
+    if (file == nullptr)
+    {
+        DbgPrintf("File %s not found.\n", cmdline);
+    }
+
     return nullptr;
 }
 
@@ -59,6 +63,8 @@ extern "C" void KeInitSystem()
 
     MmInitializeMemoryManager();
     DbgPrint("Past initializing memory manager.\n");
+
+    auto curr_usage = MmGetUsableMemory();
 
     MmVmInitialize();
     DbgPrint("Past initializing virtual memory manager.\n");
@@ -124,38 +130,42 @@ extern "C" void KeInitSystem()
     auto name = RtlInterpretDataSizeAsStringShortForm(MEBIBYTE);
     GfxTextWprintf("Usable memory: %f [%s]\n", size, name);
 
-    auto image = KeRequestModule("testimg.img");
-
-    if (!image)
-    {
-        DbgPrintf("No image found.\n");
-        IoHaltProcessor();
-    }
+    auto iso9660 = KeRequestModule("iso9660.iso");
+    auto exfat = KeRequestModule("exfat.img");
+    auto fat32 = KeRequestModule("fat32.img");
+    auto fat16 = KeRequestModule("fat16.img");
+    auto fat12 = KeRequestModule("fat12.img");
+    auto ext2 = KeRequestModule("ext2.img");
+    auto ext3 = KeRequestModule("ext3.img");
+    auto ext4 = KeRequestModule("ext4.img");
+    auto ntfs = KeRequestModule("ntfs.img");
+    auto btrfs = KeRequestModule("btrfs.img");
+    auto vfat = KeRequestModule("vfat.img");
 
     VFS vfs;
-    MemoryStorageInterface msi(123, image->address, image->size);
-    Fat32 fat32(msi);
-    auto status = fat32.IsFilesystem(msi);
-    if (!status)
-    {
-        DbgPrintf("this is not fat32.\n");
-        IoHaltProcessor();
-    }
+    MemoryStorageInterface msi0(0, ext2->address, ext2->size);
+    //Ext2 ext2_0(msi0);
+    //bool issys = ext2_0.IsFilesystem(msi0);
+    //if (!issys)
+    //{
+    //    DbgPrintf("This is not a EXT4 filesystem.\n");
+    //}
+    //vfs.MountFilesystem("D:\\", std::make_unique<Ext2>(ext2_0));
 
-    vfs.MountFilesystem("X:\\", std::make_unique<Fat32>(fat32));
-
-    auto status2 = vfs.Open("X:\\testfile.txt", Filesystem::OpenMode::READ, 0); // 0 for the kernel!!
-
-    if (status2.first == Filesystem::Status::SUCCESS)
-    {
-        DbgPrintf("Success! %lld\n", status2.second);
-    }
-    else
-    {
-        DbgPrintf("Failure: %lld\n", status2.first);
-    }
 
     HalPciInitializePCIExpress();
+
+    auto overall = (double) MmGetOverallMemory();
+    auto final_usage = MmGetUsableMemory();
+    auto delta = (double)(curr_usage - final_usage);
+    GfxTextWprintf("Overall mem: %f (MB)\n", overall / 1024 / 1024);
+    GfxTextWprintf("Used mem: %f (MB)\n", delta / 1024 / 1024);
+    GfxTextWprintf("Usage: %f%%\n", final_usage / overall);
+
+    HalPciEnumerateBus([](const PCIDevice& dev){
+        DbgPrintf("%04hX:%04hX\n", dev.identifier.vendor_id, dev.identifier.device_id);
+    });
+
 
     //IoHaltProcessor();
 }

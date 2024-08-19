@@ -1,7 +1,13 @@
 #pragma once
 
 #include <Fw/Acpi/acpi.hpp>
+#include <functional>
 #include <cstdint>
+
+struct PCIDeviceIdentifier
+{
+    uint16_t vendor_id, device_id, ss_vendor_id, ss_device_id;
+};
 
 struct PCIDeviceDatabaseEntry
 {
@@ -53,6 +59,16 @@ struct InterpretedBAR
     bool is_mmio_mapped;
     uint8_t type;
 };
+
+struct PCIDevice
+{
+    const bool is_pci_express;
+    void* raw_pcie_data;
+    const PCIDeviceIdentifier identifier;
+    const PCIDeviceDatabaseEntry* db_entry;
+};
+
+void HalPciEnumerateBus(std::function<void(const PCIDevice&)> lambda);
 
 void HalPciInterpretBAR(InterpretedBAR* ibar, uint32_t bar_value);
 uintptr_t HalPciAccessPciExpressDevice(uint64_t base_address_virtual, uint64_t bus, uint64_t slot, uint64_t function);

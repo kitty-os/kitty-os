@@ -55,7 +55,7 @@ $(IMAGE_NAME).iso: limine/limine kernel
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		--efi-boot boot/limine/limine-uefi-cd.bin \
 		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		iso_root -o $(IMAGE_NAME).iso
+		iso_root -J -R -o $(IMAGE_NAME).iso
 	./limine/limine bios-install $(IMAGE_NAME).iso
 	rm -rf iso_root
 

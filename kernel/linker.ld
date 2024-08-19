@@ -51,6 +51,8 @@ SECTIONS
 
     .data : {
         *(.data .data.*)
+        KEEP(*(.gnu.linkonce.t.*)) /* Ensure vtable sections are kept */
+        KEEP(*(.data.*)) /* Keep other data sections if necessary */
 
         /* Place the sections that contain the Limine requests as part of the .data */
         /* output section. */
@@ -72,6 +74,14 @@ SECTIONS
         *(.bss .bss.*)
         *(COMMON)
     } :data
+
+    .symtab : {
+        *(.symtab .symtab.*)
+    }
+
+    .strtab : {
+        *(.strtab .strtab.*)
+    }
 
     /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
     /* Also discard the program interpreter section since we do not need one. This is */

@@ -4,7 +4,9 @@
 
 #include <Mm/memory_manager.hpp>
 #include <Rtl/string.hpp>
+#include <Ke/debug.hpp>
 #include <Io/cpu.hpp>
+#include <Io/io.hpp>
 #include <limine.h>
 #include "acpi.hpp"
 
@@ -98,4 +100,31 @@ void FwInitializeACPI()
 
     xsdp_table = (XSDP*) rsdp_request.response->address;
     supports_xsdt = FwAcpiSupportsXSDT(xsdp_table);
+
+    // time to enable acpi mode.
+    char fadt_sign[4] = {'F', 'A', 'C', 'P'};
+    auto table = (FADT*) FwAcpiQueryTable(fadt_sign);
+    if (table->SMI_CommandPort == 0)
+    {
+        DbgPrintf("ACPI mode already enabled. SMI command port == 0.\n");
+        return;
+    }
+
+    if (table->AcpiEnable == table->AcpiDisable == 0)
+    {
+        DbgPrintf("ACPI mode already enabled. table->AcpiEnable == table->AcpiDisable == 0\n");
+        return;
+    }
+
+    if (table->PM1aControlBlock & 1)
+    {
+        DbgPrintf("ACPI mode already enabled. (table->PM1aControlBlock & 1) == 1\n");
+        return;
+    }
+
+    outb(table->SMI_CommandPort, table->AcpiEnable);
+    while ((inw(table->PM1aControlBlock) & 1) == 0)
+    {
+        asm volatile ("nop");
+    }
 }

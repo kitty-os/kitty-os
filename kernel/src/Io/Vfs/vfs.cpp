@@ -2,6 +2,7 @@
 // Created by Piotr on 13.08.2024.
 //
 
+#include <Ke/debug.hpp>
 #include <cstring>
 #include "vfs.hpp"
 
@@ -74,6 +75,25 @@ std::pair<Filesystem::Status, Filesystem::FileUID> VFS::Open(const char* path, F
     return { Filesystem::Status::FAILURE, 0 };
 }
 
+bool VFS::FileExists(const char *path, Filesystem::UserUID as_user)
+{
+    if (path == nullptr || strlen(path) == 0)
+        return false;
+
+    for (const auto& [mount_path, filesystem] : filesystems)
+    {
+        if (strncmp(path, mount_path, strlen(mount_path)) == 0)
+        {
+            std::string relative_path = path + strlen(mount_path);
+
+            auto response = filesystem->FileExists(relative_path.c_str(), as_user);
+            DbgPrintf("Couldn't confirm if file exists. Error code: %lld\n", response.first);
+            return response.second;
+        }
+    }
+
+    return false;
+}
 
 uint64_t VFS::AllocateFID()
 {

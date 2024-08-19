@@ -16,7 +16,11 @@ public:
     {
         SUCCESS,
         FAILURE,
-        UNIMPLEMENTED
+        UNIMPLEMENTED,
+        FILE_NOT_FOUND,
+        DIRECTORY_NOT_FOUND,
+        READ_ERROR,
+        INVALID_PATH
     };
 
     enum class OpenMode
@@ -50,21 +54,23 @@ public:
 
     virtual bool IsFilesystem(StorageInterface& si) = 0;
 
-    virtual std::pair<Status, FileUID> Open(const char* path, OpenMode mode, UserUID as_user)  = 0;
+    virtual std::pair<Status, FileUID> Open(const char* path, OpenMode mode, UserUID as_user) = 0;
     virtual Status Close(FileUID uid)  = 0;
 
     virtual Status Read(FileUID uid, void* buf, size_t size)  = 0;
     virtual Status Write(FileUID uid, void* buf, size_t size) = 0;
 
-    virtual Status CreateFile(const char* path, UserUID as_user, FilePermission permissions)  = 0;
-    virtual Status DeleteFile(const char* path, UserUID as_user)  = 0;
-    virtual Status GetFileInformation(const char* path, UserUID as_user)  = 0;
+    virtual Status CreateFile(const char* path, UserUID as_user, FilePermission permissions) = 0;
+    virtual Status DeleteFile(const char* path, UserUID as_user) = 0;
+    virtual Status GetFileInformation(const char* path, UserUID as_user) = 0;
+    virtual std::pair<Status, bool> FileExists(const char* path, UserUID as_user) = 0;
 
-    virtual Status CreateDirectory(const char* path, UserUID as_user, FilePermission permissions)  = 0;
+    virtual std::pair<Status, bool> DirectoryExists(const char* path, UserUID as_user) = 0;
+    virtual Status CreateDirectory(const char* path, UserUID as_user, FilePermission permissions) = 0;
     virtual Status DeleteDirectory(const char* path, UserUID as_user)  = 0;
-    virtual Status ListDirectory(const char* path, UserUID as_user, std::vector<std::string>& entries)  = 0;
+    virtual Status ListDirectory(const char* path, UserUID as_user, std::vector<std::string>& entries) = 0;
 
-    virtual std::pair<Status, bool> HasPermission(const char* path, UserUID user, FilePermission permission)  = 0;
-    virtual Status SetPermission(const char* path, UserUID user, FilePermission permission)  = 0;
-    virtual Status ClearPermission(const char* path, UserUID user, FilePermission permission)  = 0;
+    virtual std::pair<Status, bool> HasPermission(const char* path, UserUID user, FilePermission permission) = 0;
+    virtual std::pair<Status, bool> SetPermission(const char* path, UserUID user, FilePermission permission) = 0;
+    virtual std::pair<Status, bool> ClearPermission(const char* path, UserUID user, FilePermission permission) = 0;
 };

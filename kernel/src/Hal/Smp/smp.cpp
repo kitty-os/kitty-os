@@ -18,6 +18,12 @@ limine_smp_request smp_request = {
         .flags = LIMINE_SMP_X2APIC
 };
 
+size_t HalSmpGetProcessorCount()
+{
+    if (smp_request.response == nullptr) return 1;
+    return smp_request.response->cpu_count;
+}
+
 void HalSmpCoreGotoAddress(limine_smp_info* smp_info)
 {
     IoInitializeExtensions();

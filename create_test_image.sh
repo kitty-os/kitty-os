@@ -1,7 +1,7 @@
-dd if=/dev/zero of=testimg.img bs=1M count=33
+set -e
 
-mkfs.fat -F 32 testimg.img
+cp -r test_files/* test_iso/
 
-mcopy -i testimg.img testfile.txt ::
-
-mdir -i testimg.img ::
+dd if=/dev/zero of=ext2.img bs=1M count=8
+mkfs.ext2 ext2.img
+mv ext2.img resources/

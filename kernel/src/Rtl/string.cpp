@@ -143,4 +143,19 @@ int strncmp(const char* s1, const char* s2, size_t n)
     }
     return (unsigned char)*s1 - (unsigned char)*s2;
 }
+
+void* memchr(const void* ptr, int value, size_t num)
+{
+    const unsigned char* p = static_cast<const unsigned char*>(ptr);
+
+    for (size_t i = 0; i < num; ++i)
+    {
+        if (p[i] == static_cast<unsigned char>(value))
+        {
+            return const_cast<void*>(static_cast<const void*>(&p[i]));
+        }
+    }
+
+    return nullptr;
+}
 }

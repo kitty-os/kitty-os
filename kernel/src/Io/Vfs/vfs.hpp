@@ -14,6 +14,8 @@ public:
 
     std::pair<Filesystem::Status, Filesystem::FileUID> Open(const char* path, Filesystem::OpenMode mode, Filesystem::UserUID  as_user);
 
+    bool FileExists(const char* path, Filesystem::UserUID as_user);
+
     Status MountFilesystem(const char* path, std::shared_ptr<Filesystem> filesystem);
 private:
     uint64_t last_fid = 1; // last file id
