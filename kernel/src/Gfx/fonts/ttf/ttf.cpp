@@ -348,7 +348,7 @@ void GfxDrawTTFCodepoints(TTFContext* ctx, char* characters_nu, limine_framebuff
         int char_width = advance_width * ctx->scale;
 
         // Handle line wrapping
-        if (ctx->current_x + char_width > static_cast<int>(viewport.width)) {
+        if (ctx->current_x + char_width > viewport.width) {
             // Move to the next line
             ctx->current_y += line_height;
             ctx->current_x = 0;

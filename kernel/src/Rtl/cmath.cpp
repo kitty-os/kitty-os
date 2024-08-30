@@ -2,210 +2,97 @@
 // Created by Piotr on 07.08.2024.
 //
 
+#include <ccmath/ccmath.hpp>
+#include <Ke/debug.hpp>
+#include <math.h>
+
+constexpr double PI = 3.14159265358979323846;
 
 extern "C"
 {
 
-static float factorial(int n)
+float floorf(float _X)
 {
-    float result = 1.0;
-    for (int i = 1; i <= n; ++i)
-    {
-        result *= i;
-    }
-    return result;
+    return ccm::floorf(_X);
 }
 
-static double pow(double x, int y)
+float fmodf(float _X, float _Y)
 {
-    double result = 1.0;
-    for (int i = 0; i < y; i++)
-    {
-        result *= x;
-    }
-    return result;
+    return ccm::fmodf(_X, _Y);
 }
 
-float cosf(float x)
+// Fishy! Check this
+float sqrtf(float _X)
 {
-    float sum = 1.0; // Start with the first term
-    float term = 1.0;
-    int i = 0;
-
-    while (1)
-    {
-        i += 2;
-        term *= -x * x / ((i - 1) * i); // Compute next term
-        if (term < 1e-6 && term > -1e-6)
-        { // Small enough term
-            break;
-        }
-        sum += term;
-    }
-
-    return sum;
+    return ccm::sqrtf(_X);
 }
 
-float sinf(float x)
+float powf(float _Base, float _Exp)
 {
-    float sum = x; // Start with the first term
-    float term = x;
-    int i = 1;
-
-    while (1)
-    {
-        i += 2;
-        term *= -x * x / (i * (i - 1)); // Compute next term
-        if (term < 1e-6 && term > -1e-6)
-        { // Small enough term
-            break;
-        }
-        sum += term;
-    }
-
-    return sum;
-}
-
-int abs(int x)
-{
-    return (x < 0) ? -x : x;
-}
-
-float sqrtf(float x)
-{
-    if (x < 0) {
-        return -1;
-    }
-
-    if (x == 0 || x == 1) {
-        return x;
-    }
-
-    float guess = x / 2.0f;
-    float epsilon = 0.00001f;
-
-    while ((guess * guess - x) > epsilon || (x - guess * guess) > epsilon)
-    {
-        guess = (guess + x / guess) / 2.0f;
-    }
-
-    return guess;
-}
-
-float floorf(float x)
-{
-    int i = (int)x;
-
-    if (x < 0 && x != i)
-    {
-        return i - 1;
-    }
-
-    return i;
-}
-
-float ceilf(float x)
-{
-    int i = (int)x;
-
-    if (x > 0 && x != i)
-    {
-        return i + 1;
-    }
-
-    return i;
+    return ccm::pow(_Base, _Exp);
 }
 
 
-float fmodf(float x, float y)
-{
-    if (y == 0.0f)
+float acosf(float x) {
+    if (x < -1.0f || x > 1.0f)
     {
         return 0.0f;
     }
 
-    int quotient = (int)(x / y);
-    float remainder = x - (quotient * y);
-
-    return remainder;
-}
-
-float acosf(float x)
-{
-    if (x < -1.0f || x > 1.0f)
-    {
-        return -1;
-    }
-
-    float negate = (x < 0) ? 1.0f : 0.0f;
-    x = (x < 0) ? -x : x;
-
+    float negate = x < 0.0f ? 1.0f : 0.0f;
+    x = x < 0.0f ? -x : x;
     float ret = -0.0187293f;
-    ret = ret * x + 0.0742610f;
-    ret = ret * x - 0.2121144f;
-    ret = ret * x + 1.5707288f;
+    ret = ret * x;
+    ret = ret + 0.0742610f;
+    ret = ret * x;
+    ret = ret - 0.2121144f;
+    ret = ret * x;
+    ret = ret + 1.5707288f;
     ret = ret * sqrtf(1.0f - x);
-    ret = ret - 2 * negate * ret;
-    return negate * 3.14159265358979f + ret;
+    ret = ret - 2.0f * negate * ret;
+    return negate * PI + ret;
 }
 
-float power_int(float x, int n)
-{
+float cosf(float x) {
+    float x2 = x * x;
     float result = 1.0f;
-    for (int i = 0; i < n; ++i)
+    float term = 1.0f;
+    int i;
+
+    for (i = 1; i < 10; i++)
     {
-        result *= x;
+        term *= -x2 / (2 * i * (2 * i - 1));
+        result += term;
     }
+
     return result;
 }
 
-float powf(float base, float exponent)
-{
-    if (base < 0)
+double cos(double x) {
+    double x2 = x * x;
+    double result = 1.0;
+    double term = 1.0;
+    int i;
+
+    for (i = 1; i < 10; i++)
     {
-        if (exponent != (int)exponent)
-        {
-            return -1; // Error code
-        }
+        term *= -x2 / (2 * i * (2 * i - 1));
+        result += term;
     }
 
-    if (exponent == (int)exponent)
-    {
-        return power_int(base, (int)exponent);
-    }
-
-    if (base == 0.0f)
-    {
-        return (exponent > 0) ? 0.0f : (exponent < 0) ? 1.0f / 0.0f : 1.0f; // Handle 0^positive, 0^negative, 0^0
-    }
-
-    if (base == 1.0f || exponent == 0)
-    {
-        return 1.0f;
-    }
-
-    return -1; // Basic implementation does not handle non-integer exponents or negative bases with non-integer exponents
+    return result;
 }
 
-
-double cos(double x)
+float ceilf(float x)
 {
-    const int TERMS = 10;
-    double sum = 0.0;
-
-    for (int n = 0; n < TERMS; n++)
+    int integer_part = (int) x;
+    if (x > (float) integer_part)
     {
-        // Calculate (2n)!
-        double fact = factorial(2 * n);
-
-        // Calculate term (-1)^n * x^(2n) / (2n)!
-        double term = (n % 2 == 0 ? 1 : -1) * pow(x, 2 * n) / fact;
-
-        // Add term to sum
-        sum += term;
+        return (float) (integer_part + 1);
+    } else
+    {
+        return (float) integer_part;
     }
-
-    return sum;
 }
 
 }

@@ -2,7 +2,7 @@
 // Created by Piotr on 21.07.2024.
 //
 
-#include <Rtl/math.hpp>
+#include <ccmath/ccmath.hpp>
 #include "2d.hpp"
 
 void GfxDrawPixel(
@@ -110,8 +110,8 @@ void GfxDrawRectangleFragShadered(
 
     size_t x0 = position.x;
     size_t y0 = position.y;
-    size_t x1 = Math::min(position.x + dimensions.x, framebuffer->width);
-    size_t y1 = Math::min(position.y + dimensions.y, framebuffer->height);
+    size_t x1 = ccm::min(position.x + dimensions.x, framebuffer->width);
+    size_t y1 = ccm::min(position.y + dimensions.y, framebuffer->height);
 
     for (size_t y = y0; y < y1; ++y) {
         for (size_t x = x0; x < x1; ++x) {
@@ -133,8 +133,8 @@ void GfxDrawLine(
     int x2 = end.x;
     int y2 = end.y;
 
-    int dx = Math::abs(x2 - x1);
-    int dy = -Math::abs(y2 - y1);
+    int dx = ccm::abs(x2 - x1);
+    int dy = -ccm::abs(y2 - y1);
     int sx = x1 < x2 ? 1 : -1;
     int sy = y1 < y2 ? 1 : -1;
     int err = dx + dy;

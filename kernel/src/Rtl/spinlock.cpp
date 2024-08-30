@@ -1,7 +1,7 @@
 #include "spinlock.hpp"
 
 // Constructor: Initializes the atomic flag
-Spinlock::Spinlock() : flag(ATOMIC_FLAG_INIT) {}
+Spinlock::Spinlock() : flag() {}
 
 // Method to acquire the spinlock
 void Spinlock::lock() {

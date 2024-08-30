@@ -90,10 +90,10 @@ double RtlConvertDataSize(uint64_t data_size, DataSize input_datasize, DataSize 
     }
 
     // Convert input data size to bytes
-    double bytes = static_cast<double>(data_size) * input_datasize;
+    double bytes = static_cast<double>(data_size) * static_cast<double>(input_datasize);
 
     // Convert bytes to the output data size unit
-    double converted_size = bytes / output_datasize;
+    double converted_size = bytes / static_cast<double>(output_datasize);
 
     return converted_size;
 }

@@ -54,7 +54,7 @@ limine_file* KeRequestModule(const char* cmdline)
 
     return nullptr;
 }
-
+extern "C" void test_math();
 extern "C" void KeInitSystem()
 {
     limine_framebuffer *framebuffer;
@@ -107,29 +107,6 @@ extern "C" void KeInitSystem()
 
     GfxTextInitializeWithTTFFont(font_file->address, 20);
 
-    auto ecount = MmRetrieveMemoryMapEntryCount();
-    auto entries = MmRetrieveMemoryMap();
-
-    uint64_t usable_memory = 0;
-
-    for (size_t i = 0; ecount > i; i++)
-    {
-        auto entry = entries[i];
-
-        // auto type_name = MmInterpretMemoryMapEntryTypeAsWideString(entry->type);
-
-        // GfxTextWprintf(L"%d. %llx -> %llx (%f %s)\t[%ls]\n", i, entry->base, entry->base + entry->length, size, name, type_name);
-
-        if (entry->type == LIMINE_MEMMAP_USABLE)
-        {
-            usable_memory += entry->length;
-        }
-    }
-
-    auto size = RtlConvertDataSize(usable_memory, BYTE, MEBIBYTE);
-    auto name = RtlInterpretDataSizeAsStringShortForm(MEBIBYTE);
-    GfxTextWprintf("Usable memory: %f [%s]\n", size, name);
-
     auto iso9660 = KeRequestModule("iso9660.iso");
     auto exfat = KeRequestModule("exfat.img");
     auto fat32 = KeRequestModule("fat32.img");
@@ -155,17 +132,9 @@ extern "C" void KeInitSystem()
 
     HalPciInitializePCIExpress();
 
-    auto overall = (double) MmGetOverallMemory();
-    auto final_usage = MmGetUsableMemory();
-    auto delta = (double)(curr_usage - final_usage);
-    GfxTextWprintf("Overall mem: %f (MB)\n", overall / 1024 / 1024);
-    GfxTextWprintf("Used mem: %f (MB)\n", delta / 1024 / 1024);
-    GfxTextWprintf("Usage: %f%%\n", final_usage / overall);
-
     HalPciEnumerateBus([](const PCIDevice& dev){
         DbgPrintf("%04hX:%04hX\n", dev.identifier.vendor_id, dev.identifier.device_id);
     });
 
-
-    //IoHaltProcessor();
+    IoHaltProcessor();
 }

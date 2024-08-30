@@ -15,7 +15,7 @@ void RtlInitializeGlobalHeap()
 {
     // 1GB vmem max
     // 1MB pmem init
-    heap.HeapInit(1 * 1024 * 1024 * 1024ULL, 1 * 1024 * 1024ULL);
+    heap.HeapInit(32 * 1024 * 1024 * 1024ULL, 1 * 1024 * 1024ULL);
 }
 
 void* operator new(std::size_t size)

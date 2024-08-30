@@ -35,10 +35,12 @@ void GfxTextWprintf(const char* fmt, ...)
 
 size_t GfxGetMaxHorizontalCharacters()
 {
-
+    // todo
+    return 0;
 }
 
 size_t GfxGetMaxVerticalCharacters()
 {
-
+    // todo
+    return 0;
 }

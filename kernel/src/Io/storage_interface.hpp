@@ -11,6 +11,8 @@ public:
         SUCCESS, FAILURE, OUT_OF_BOUNDS, DEVICE_ERROR, NOT_INITIALIZED
     };
 
+    virtual ~StorageInterface() = default;
+
     virtual uint64_t GetUUID() = 0;
 
     virtual const char* GetLastError() = 0;

@@ -10,6 +10,7 @@ IoInitializeExtensions:
 
     mov rax, cr4
     or ax, 3 << 9
+    or ax, 1 << 16
     mov cr4, rax
 
     ret

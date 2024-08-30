@@ -53,10 +53,20 @@ $(eval $(call DEFAULT_VAR,KLDFLAGS,$(DEFAULT_KLDFLAGS)))
 override SHARED_FLAGS := \
     -Wall \
     -Wextra \
+	-Wno-unused-parameter \
+	-Wno-unused-variable \
+	-pedantic \
+    -Wshadow \
+    -Wnull-dereference \
+    -Wformat \
+    -Wformat-security \
+    -Wno-c99-extensions \
     -O3 \
     -ffreestanding \
-    -fno-stack-protector \
-    -fno-stack-check \
+    -fstack-protector \
+	-fstack-protector-strong \
+	-fstack-protector-all \
+    -fstack-check \
     -fno-lto \
     -fPIE \
     -m64 \
@@ -66,17 +76,26 @@ override SHARED_FLAGS := \
 	-msse2 \
     -g \
     -mno-red-zone \
+    -Wimplicit-function-declaration \
+    -Wpointer-arith \
+    -Wbad-function-cast \
+    -Wno-trigraphs \
 
 # Internal C++ flags that should not be changed by the user.
 override KCXXFLAGS += \
     -std=c++23 \
     -fno-rtti \
     -fno-exceptions \
+    -Wmissing-declarations \
+    -Weffc++ \
+    -Woverloaded-virtual \
+    -Wnon-virtual-dtor \
     $(SHARED_FLAGS)
 
 # Internal C flags that should not be changed by the user.
 override KCFLAGS += \
     -std=gnu11 \
+    -Wstrict-prototypes \
     $(SHARED_FLAGS)
 
 # Internal C/C++ preprocessor flags that should not be changed by the user.
@@ -85,6 +104,7 @@ override KCPPFLAGS := \
     -I include \
     -I include/xed/ \
     -I include/stb/ \
+	-I include/uacpi/ \
     $(KCPPFLAGS) \
     -MMD \
     -MP \

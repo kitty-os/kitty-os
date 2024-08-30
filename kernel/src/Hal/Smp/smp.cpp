@@ -6,6 +6,7 @@
 #include <Hal/Int/idt.hpp>
 #include <Hal/Mem/gdt.hpp>
 #include <Hal/Irq/irq.hpp>
+#include <Ke/Tls/tls.hpp>
 #include <Ke/debug.hpp>
 #include <Io/cpu.hpp>
 #include <limine.h>
@@ -28,6 +29,9 @@ void HalSmpCoreGotoAddress(limine_smp_info* smp_info)
 {
     IoInitializeExtensions();
 
+    KeTlsSetPointer(new ThreadLocalStorage());
+    KeTlsWriteProcessorIndex(smp_info->processor_id);
+
     HalLoadGlobalDescriptorTable();
     DbgPrintf("[CPU%d] Loaded new GDT.\n", smp_info->processor_id);
 
@@ -40,7 +44,7 @@ void HalSmpCoreGotoAddress(limine_smp_info* smp_info)
     HalIrqInitializeLAPIC();
     DbgPrintf("[CPU%d]Configured LAPIC.\n", smp_info->processor_id);
 
-    DbgPrintf("Started CPU%d.\n", smp_info->processor_id);
+    DbgPrintf("Started CPU%d.\n", KeTlsReadProcessorIndex());
     while (1)
     {
         asm volatile ("nop");
