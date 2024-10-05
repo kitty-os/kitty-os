@@ -1,1 +1,0 @@
-qemu-system-x86_64 -monitor stdio -smp 12 -serial file:serial.txt -device isa-debug-exit,iobase=0x501,iosize=2 -device qemu-xhci -debugcon file:debug.log -M q35 -m 4G -cdrom template.iso -boot d
